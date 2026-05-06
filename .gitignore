@@ -1,0 +1,5 @@
+patcher.dll
+*.vcxproj*
+Debug/
+Release/
+x64/
