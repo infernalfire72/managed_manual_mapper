@@ -125,6 +125,11 @@ bool start_and_inject(
 
     // Create managed byte array to hold the dll bytes
     const auto alloc_thread{ CreateRemoteThreadEx(process.hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)create_vector_shell, nullptr, NULL, nullptr, nullptr) };
+    if (!alloc_thread) {
+        std::cout << "Failed creating alloc thread." << std::endl;
+        return false;
+    }
+
     WaitForSingleObject(alloc_thread, INFINITE);
 
     // Get the remote pointer to the managed byte array
@@ -145,6 +150,11 @@ bool start_and_inject(
 
     std::cout << inject_shell << std::endl;
     const auto inject_thread{ CreateRemoteThreadEx(process.hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)inject_shell, nullptr, NULL, nullptr, nullptr) };
+    if (!inject_thread) {
+        std::cout << "Failed creating inject thread." << std::endl;
+        return false;
+    }
+
     WaitForSingleObject(inject_thread, INFINITE);
 
     // Get the remote pointer to the managed byte array
