@@ -169,7 +169,10 @@ bool start_and_inject(
 
     if (!inject_exit_code) {
         std::cout << "Failed injecting..." << std::endl;
+        return false;
     }
+
+    return true;
 }
 
 int main()
@@ -180,5 +183,4 @@ int main()
 
     std::wstring args{ L"C:\\Users\\Ye\\AppData\\Local\\osu!\\osu!.exe -devserver akatsuki.gg" };
     start_and_inject(args, dll, entry_type, entry_method);
-    
 }
