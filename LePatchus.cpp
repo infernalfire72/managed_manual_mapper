@@ -59,7 +59,7 @@ bool start_and_inject(
 
     std::cout << process.dwProcessId << std::endl;
     ResumeThread(process.hThread);
-    Sleep(100);
+    Sleep(5000);
     SuspendThread(process.hThread);
 
     const auto [mscoree, oleaut32] = Process::get_modules(process.hProcess, std::array{ L"mscoree.dll"sv, L"oleaut32.dll"sv });
@@ -85,8 +85,10 @@ bool start_and_inject(
         return 0;
     }
     const auto& [create_vector, destroy, put_elem, sys_alloc_string, variant_init] { oleaut32_result.value() };
-    printf("%p %p %p %p\n", create_vector, destroy, sys_alloc_string, variant_init);
-
+    if (!create_vector || !destroy || !put_elem || !sys_alloc_string || !variant_init) {
+        return 0;
+    }
+    printf("%p %p %p %p\n", (void*)create_vector, (void*)put_elem, (void*)sys_alloc_string, (void*)variant_init);
 
     // Allocate and prepare remote memory
     const auto shared_memory{ VirtualAllocEx(process.hProcess, nullptr, 4096, MEM_COMMIT, PAGE_EXECUTE_READWRITE) };
@@ -148,7 +150,6 @@ bool start_and_inject(
         iid_appdomain, safe_array, entry_type_name, entry_method_name);
     WriteProcessMemory(process.hProcess, inject_shell, &i_shell, sizeof InjectShell, nullptr);
 
-    std::cout << inject_shell << std::endl;
     const auto inject_thread{ CreateRemoteThreadEx(process.hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)inject_shell, nullptr, NULL, nullptr, nullptr) };
     if (!inject_thread) {
         std::cout << "Failed creating inject thread." << std::endl;
