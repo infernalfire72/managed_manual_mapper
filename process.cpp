@@ -1,6 +1,7 @@
 #include <cassert>
 #include <functional>
 #include <optional>
+#include <string>
 #include <string_view>
 #include <Windows.h>
 #include <TlHelp32.h>

@@ -59,14 +59,19 @@ bool start_and_inject(
 
     std::cout << process.dwProcessId << std::endl;
     ResumeThread(process.hThread);
-    Sleep(5000);
-    SuspendThread(process.hThread);
-
-    const auto [mscoree, oleaut32] = Process::get_modules(process.hProcess, std::array{ L"mscoree.dll"sv, L"oleaut32.dll"sv });
-    if (!mscoree || !oleaut32) {
+    Sleep(500);
+    
+    auto [mscoree, oleaut32] { Process::get_modules(process.hProcess, std::array{ L"mscoree.dll"sv, L"oleaut32.dll"sv }) };
+    for (int retries = 0; retries < 5 && (!mscoree || !oleaut32); retries++) {
+        Sleep(500);
         std::cout << "Modules not found" << std::endl;
+        const auto [m, o] = Process::get_modules(process.hProcess, std::array{L"mscoree.dll"sv, L"oleaut32.dll"sv});
+        mscoree = m;
+        oleaut32 = o;
         return 0;
     }
+
+    SuspendThread(process.hThread);
 
     std::cout << "mscoree: " << mscoree << std::endl;
     std::cout << "oleaut32: " << oleaut32 << std::endl;
@@ -182,6 +187,6 @@ int main()
     const std::wstring_view entry_type{ L"Akatsuki.Patcher.Main"sv };
     const std::wstring_view entry_method{ L"Initialize"sv };
 
-    std::wstring args{ L"C:\\Users\\Ye\\AppData\\Local\\osu!\\osu!.exe -devserver akatsuki.gg" };
+    std::wstring args{ L"C:\\Users\\Julius\\AppData\\Local\\osu!\\osu!.exe -devserver akatsuki.gg" };
     start_and_inject(args, dll, entry_type, entry_method);
 }
